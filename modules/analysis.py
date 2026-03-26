@@ -287,7 +287,7 @@ def compute_integral(func_str: str, var_str: str = "x",
         # Tekshirish: F'(x) = f(x) ?
         check = sp.simplify(diff(indef_simplified, var) - f)
         steps.append(format_step(4, "Tekshirish: F'(x) = f(x) ?",
-            f"F'(x) - f(x) = {check} → {'✓ To\'g\'ri' if check == 0 else '⚠ Farq bor'}"))
+            f"F'(x) - f(x) = {check} → {'✓ Togri' if check == 0 else '⚠ Farq bor'}"))
 
         if is_definite:
             # Nyuton-Leybnits formulasi
