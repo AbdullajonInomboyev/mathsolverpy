@@ -1,0 +1,1542 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MathSolverPy</title>
+
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['\\(','\\)']],
+    displayMath: [['$$','$$']],
+    packages: {'[+]': ['ams', 'boldsymbol']}
+  },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] },
+  startup: { typeset: false }
+};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
+
+<style>
+/* ── Reset ── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+/* ── Tokens ── */
+:root{
+  --bg:#f4f6fb;
+  --surface:#fff;
+  --border:#dde3ee;
+  --border2:#b8c4d8;
+  --blue:#2563eb;
+  --blue-lt:#eff4ff;
+  --blue-dk:#1d4ed8;
+  --navy:#1a2744;
+  --green:#15803d;
+  --green-lt:#f0fdf4;
+  --red:#dc2626;
+  --red-lt:#fef2f2;
+  --purple:#6d28d9;
+  --purple-lt:#f5f3ff;
+  --gray:#64748b;
+  --gray-lt:#f8fafc;
+  --text:#1e293b;
+  --text2:#475569;
+  --text3:#94a3b8;
+  --r:10px;
+  --rl:14px;
+  --sh:0 1px 4px rgba(0,0,0,.08);
+  --sh2:0 4px 16px rgba(0,0,0,.10);
+  /* Times New Roman for all body text */
+  --font-serif:'Times New Roman',Times,Georgia,serif;
+  --font-ui:'Segoe UI',system-ui,sans-serif;
+  --font-mono:'JetBrains Mono','Fira Code','Courier New',monospace;
+}
+
+html{font-size:15px}
+body{
+  font-family:var(--font-serif);
+  background:var(--bg);
+  color:var(--text);
+  line-height:1.65;
+  display:flex;
+  min-height:100vh;
+}
+
+/* ════════════════════════════════════════════════
+   SIDEBAR
+   ════════════════════════════════════════════════ */
+.sb{
+  width:230px;min-width:230px;
+  background:var(--surface);
+  border-right:1px solid var(--border);
+  display:flex;flex-direction:column;
+  position:sticky;top:0;height:100vh;overflow-y:auto;
+  padding-bottom:24px;
+}
+.sb-brand{
+  padding:24px 18px 18px;
+  border-bottom:1px solid var(--border);
+  text-align:center;
+}
+.sb-logo{font-size:2rem;color:var(--blue);line-height:1;margin-bottom:8px}
+.sb-title{
+  font-family:var(--font-serif);
+  font-size:1.12rem;font-weight:700;
+  color:var(--navy);letter-spacing:-.01em;
+}
+.sb-sub{font-family:var(--font-ui);font-size:.7rem;color:var(--gray);margin-top:3px}
+
+.sb-nav{padding:14px 8px;flex:1}
+.sb-lbl{
+  font-family:var(--font-ui);
+  font-size:.62rem;font-weight:700;
+  letter-spacing:.1em;text-transform:uppercase;
+  color:var(--text3);padding:0 10px 6px;
+  margin-top:6px;display:block;
+}
+.nb{
+  display:flex;align-items:center;gap:9px;
+  width:100%;padding:9px 12px;
+  border:none;background:transparent;border-radius:8px;
+  cursor:pointer;font-family:var(--font-ui);
+  font-size:.85rem;color:var(--text2);font-weight:500;
+  text-align:left;transition:background .13s,color .13s;
+  margin-bottom:2px;
+}
+.nb .ic{font-size:.95rem;width:20px;text-align:center}
+.nb:hover{background:var(--gray-lt);color:var(--text)}
+.nb.on{background:var(--blue-lt);color:var(--blue-dk);font-weight:700}
+
+.sb-libs{padding:14px 18px 0;border-top:1px solid var(--border)}
+.sb-libs-lbl{
+  font-family:var(--font-ui);
+  font-size:.65rem;font-weight:700;
+  letter-spacing:.08em;text-transform:uppercase;
+  color:var(--text3);margin-bottom:7px;display:block;
+}
+.pill{
+  display:inline-block;
+  font-family:var(--font-ui);
+  background:var(--blue-lt);color:var(--blue-dk);
+  font-size:.7rem;font-weight:700;
+  border-radius:20px;padding:2px 9px;margin:2px 2px 2px 0;
+}
+
+/* ════════════════════════════════════════════════
+   MAIN
+   ════════════════════════════════════════════════ */
+.main{
+  flex:1;padding:30px 36px 56px;
+  overflow-y:auto;max-width:980px;
+}
+
+/* Pages */
+.pg{display:none}.pg.on{display:block}
+
+/* Module header */
+.mh{padding-bottom:13px;border-bottom:2.5px solid var(--blue);margin-bottom:22px}
+.mh-title{
+  font-family:var(--font-serif);
+  font-size:1.6rem;font-weight:700;
+  color:var(--navy);letter-spacing:-.02em;line-height:1.2;
+}
+.mh-sub{font-size:.85rem;color:var(--gray);margin-top:4px}
+
+/* Tabs */
+.tabs{display:flex;gap:3px;border-bottom:2px solid var(--border);margin-bottom:20px}
+.tb{
+  padding:8px 15px;border:none;background:transparent;
+  border-bottom:2px solid transparent;margin-bottom:-2px;
+  cursor:pointer;font-family:var(--font-ui);
+  font-size:.83rem;font-weight:600;color:var(--text3);
+  border-radius:6px 6px 0 0;transition:color .13s,border-color .13s;
+}
+.tb:hover{color:var(--text2)}
+.tb.on{color:var(--blue);border-bottom-color:var(--blue)}
+.tp{display:none}.tp.on{display:block}
+
+/* Info bar */
+.ib{
+  font-family:var(--font-serif);
+  background:#eff6ff;border-left:3px solid var(--blue);
+  border-radius:0 8px 8px 0;
+  padding:9px 14px;font-size:.9rem;color:#1e3a8a;
+  margin-bottom:16px;line-height:1.55;
+}
+.ib b{font-weight:700}
+.ib code{
+  font-family:var(--font-mono);
+  background:#dbeafe;padding:1px 5px;border-radius:4px;font-size:.8rem;
+}
+
+/* ════════════════════════════════════════════════
+   MATEMATIK IFODA WIDGET  (asosiy yangilik)
+   ════════════════════════════════════════════════ */
+.mif-wrap{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--rl);
+  padding:18px 20px 14px;
+  margin-bottom:14px;
+  box-shadow:var(--sh);
+}
+
+/* Section label — xuddi rasmday */
+.mif-label{
+  font-family:var(--font-ui);
+  font-size:.65rem;font-weight:800;
+  letter-spacing:.12em;text-transform:uppercase;
+  color:var(--blue);margin-bottom:10px;display:block;
+}
+
+/* Input field */
+.mif-input{
+  width:100%;
+  padding:10px 14px;
+  border:1.5px solid var(--border);
+  border-radius:var(--r) var(--r) 0 0;
+  font-size:.95rem;
+  font-family:var(--font-mono);
+  color:var(--text);background:var(--surface);
+  transition:border-color .15s,box-shadow .15s;
+  border-bottom:none;
+}
+.mif-input:focus{
+  outline:none;
+  border-color:var(--blue);
+  box-shadow:0 0 0 3px rgba(37,99,235,.1);
+}
+
+/* Operator shortcut bar */
+.mif-ops{
+  display:flex;gap:4px;
+  padding:5px 10px;
+  background:#f8faff;
+  border:1.5px solid var(--border);
+  border-top:1px solid #e8edf8;
+  border-bottom:none;
+}
+.mif-op{
+  padding:3px 11px;
+  border:1px solid var(--border2);
+  border-radius:20px;
+  background:var(--surface);
+  font-family:var(--font-ui);
+  font-size:.78rem;font-weight:600;
+  color:var(--text2);cursor:pointer;
+  transition:background .13s,border-color .13s,color .13s;
+  user-select:none;
+}
+.mif-op:hover{background:var(--blue-lt);border-color:var(--blue);color:var(--blue-dk)}
+.mif-op .op-sym{
+  font-family:var(--font-mono);
+  font-size:.85rem;color:var(--blue);margin-right:3px;
+}
+
+/* LaTeX preview box */
+.mif-preview{
+  border:1.5px solid var(--border);
+  border-top:none;
+  border-radius:0 0 var(--r) var(--r);
+  min-height:58px;
+  background:#f8faff;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  padding:6px 16px 8px;
+  transition:background .2s;
+}
+.mif-preview-lbl{
+  font-family:var(--font-ui);
+  font-size:.62rem;font-weight:800;
+  letter-spacing:.11em;text-transform:uppercase;
+  color:var(--blue);align-self:flex-start;margin-bottom:2px;
+}
+.mif-preview.error{background:#fff8f8;border-color:#fca5a5}
+.mif-preview.error .mif-preview-lbl{color:var(--red)}
+.mif-preview-err{
+  font-size:.8rem;color:var(--red);
+  font-family:var(--font-ui);font-style:italic;
+}
+
+/* ════════════════════════════════════════════════
+   EXAMPLES ROW
+   ════════════════════════════════════════════════ */
+.ex-wrap{margin-bottom:12px}
+.ex-lbl{
+  font-family:var(--font-ui);
+  font-size:.63rem;font-weight:800;
+  letter-spacing:.09em;text-transform:uppercase;
+  color:var(--text3);margin-bottom:7px;display:block;
+}
+.ex-row{display:flex;flex-wrap:wrap;gap:7px}
+.ex{
+  padding:5px 14px;
+  border:1px solid var(--border2);
+  border-radius:20px;
+  background:var(--gray-lt);
+  font-family:var(--font-serif);
+  font-size:.85rem;
+  color:var(--blue-dk);
+  cursor:pointer;
+  transition:background .13s,border-color .13s;
+  white-space:nowrap;
+}
+.ex:hover{background:var(--blue-lt);border-color:var(--blue)}
+
+/* Simple inputs (non-math) */
+.fi,.fs{
+  padding:9px 13px;
+  border:1.5px solid var(--border);
+  border-radius:var(--r);
+  font-size:.9rem;color:var(--text);
+  background:var(--surface);
+  transition:border-color .15s;
+  font-family:var(--font-ui);
+}
+.fi:focus,.fs:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,.1)}
+.fs{cursor:pointer}
+.fl{display:block;font-family:var(--font-ui);font-size:.75rem;font-weight:700;color:var(--text2);margin-bottom:5px}
+.fg{margin-bottom:13px}
+.frow{display:flex;gap:12px}.frow .fg{flex:1}
+.fhint{font-family:var(--font-ui);font-size:.72rem;color:var(--text3);margin-top:4px}
+
+/* Solve button */
+.sbtn{
+  display:inline-flex;align-items:center;justify-content:center;gap:7px;
+  width:100%;padding:11px 24px;margin-top:6px;
+  background:var(--blue);color:#fff;border:none;
+  border-radius:var(--r);
+  font-family:var(--font-ui);font-size:.92rem;font-weight:700;
+  cursor:pointer;transition:background .13s,transform .1s;
+}
+.sbtn:hover{background:var(--blue-dk)}
+.sbtn:active{transform:scale(.98)}
+.sbtn.loading{opacity:.65;pointer-events:none}
+
+/* ════════════════════════════════════════════════
+   RESULT
+   ════════════════════════════════════════════════ */
+.res{margin-top:22px}
+
+/* Answer block */
+.ans-block{
+  background:var(--green-lt);
+  border:2px solid var(--green);
+  border-radius:var(--rl);
+  padding:16px 22px 12px;
+  margin-bottom:18px;text-align:center;
+}
+.ans-tag{
+  display:inline-block;
+  font-family:var(--font-ui);
+  background:#dcfce7;color:#14532d;
+  font-size:.63rem;font-weight:800;
+  letter-spacing:.1em;text-transform:uppercase;
+  padding:2px 12px;border-radius:20px;margin-bottom:8px;
+}
+.ans-ltx{font-size:1.1rem;min-height:38px;padding:2px 0}
+.ans-extra{font-family:var(--font-ui);font-size:.78rem;color:var(--green);margin-top:5px}
+
+/* Steps */
+.steps-hd{
+  font-family:var(--font-ui);
+  font-size:.65rem;font-weight:800;
+  letter-spacing:.09em;text-transform:uppercase;
+  color:var(--text3);
+  margin-bottom:10px;padding-bottom:6px;
+  border-bottom:1px solid var(--border);
+}
+.sc{
+  background:var(--surface);
+  border:1px solid #e2e8f4;
+  border-left:4px solid var(--blue);
+  border-radius:0 var(--r) var(--r) 0;
+  padding:11px 16px 9px;margin-bottom:8px;
+  box-shadow:var(--sh);
+}
+.sc.rl{border-left-color:var(--purple)}
+.sc.ck{border-left-color:var(--green);background:#fafffe}
+
+.sc-badge{
+  display:inline-block;
+  font-family:var(--font-ui);
+  font-size:.6rem;font-weight:800;
+  letter-spacing:.09em;text-transform:uppercase;
+  padding:2px 9px;border-radius:20px;margin-bottom:5px;
+  background:#eff4ff;color:var(--blue);
+}
+.sc.rl .sc-badge{background:#f5f3ff;color:var(--purple)}
+.sc.ck .sc-badge{background:#f0fdf4;color:var(--green)}
+
+.sc-title{
+  font-family:var(--font-serif);
+  font-size:.97rem;font-weight:700;color:var(--navy);
+  margin-bottom:5px;
+}
+.sc.rl .sc-title{color:#4c1d95}
+.sc.ck .sc-title{color:#14532d}
+
+.sc-body{
+  font-family:var(--font-serif);
+  font-size:.9rem;color:var(--text2);
+  white-space:pre-wrap;line-height:1.8;
+}
+.sc-ltx{text-align:center;margin:6px 0 3px}
+
+/* Plot */
+.plot-img{max-width:100%;border-radius:var(--r);border:1px solid var(--border);margin-top:12px}
+
+/* Iteration table */
+.it-wrap{margin-top:14px;border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
+.it-head{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:9px 14px;background:var(--gray-lt);
+  border-bottom:1px solid var(--border);cursor:pointer;user-select:none;
+}
+.it-head span{font-family:var(--font-ui);font-size:.76rem;font-weight:700;color:var(--text2);letter-spacing:.04em;text-transform:uppercase}
+.it-body{display:none;overflow-x:auto}
+.it-body.open{display:block}
+.it-body table{width:100%;border-collapse:collapse;font-size:.77rem;font-family:var(--font-mono)}
+.it-body th{background:var(--blue-lt);color:var(--blue-dk);font-weight:700;padding:7px 12px;text-align:right;border-bottom:1px solid var(--border)}
+.it-body td{padding:5px 12px;text-align:right;border-bottom:1px solid var(--border);color:var(--text2)}
+.it-body tr:last-child td{border-bottom:none}
+.it-body tr:nth-child(even) td{background:var(--gray-lt)}
+
+/* Error */
+.err{
+  background:var(--red-lt);border:1.5px solid #fca5a5;
+  border-radius:var(--r);padding:12px 16px;
+  font-family:var(--font-serif);color:#7f1d1d;font-size:.9rem;margin-top:10px;
+}
+.err strong{font-weight:700}
+
+/* ════════════════════════════════════════════════
+   MATRIX EDITOR
+   ════════════════════════════════════════════════ */
+.mat-ctrl{display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.mat-ctrl .fg{flex:none}
+.mat-ctrl .fi{width:68px;text-align:center;font-size:.85rem;padding:7px 8px}
+.mat-lbl{
+  font-family:var(--font-ui);
+  font-size:.7rem;font-weight:700;letter-spacing:.07em;
+  text-transform:uppercase;color:var(--text3);
+  margin-bottom:8px;display:block;
+}
+.mat-btn{
+  padding:7px 14px;border-radius:8px;cursor:pointer;
+  font-family:var(--font-ui);font-size:.78rem;font-weight:600;
+  align-self:flex-end;margin-bottom:1px;border:1px solid;
+  transition:background .13s;
+}
+.mat-btn.outline{background:var(--gray-lt);border-color:var(--border);color:var(--text2)}
+.mat-btn.primary{background:var(--blue-lt);border-color:var(--blue);color:var(--blue-dk)}
+
+.mat-grid table{border-collapse:separate;border-spacing:4px}
+.mat-grid td input{
+  width:64px;padding:7px 6px;
+  border:1.5px solid var(--border);border-radius:7px;
+  font-size:.87rem;text-align:center;
+  font-family:var(--font-mono);color:var(--text);background:var(--surface);
+  transition:border-color .13s;
+}
+.mat-grid td input:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 2px rgba(37,99,235,.1)}
+.mat-bracket{display:inline-flex;align-items:center;gap:3px}
+.mat-par{font-size:2.2rem;color:var(--navy);font-weight:200;line-height:1;user-select:none}
+
+/* ════════════════════════════════════════════════
+   HOME PAGE
+   ════════════════════════════════════════════════ */
+.home-hero{text-align:center;padding:16px 0 28px}
+.home-title{
+  font-family:var(--font-serif);
+  font-size:2.4rem;font-weight:700;
+  color:var(--navy);letter-spacing:-.03em;line-height:1.1;
+}
+.home-title .ac{color:var(--blue)}
+.home-sub{font-size:1rem;color:var(--gray);margin-top:10px;max-width:540px;margin-inline:auto}
+
+.mc-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:24px 0}
+.mc{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--rl);padding:16px;
+  text-align:center;box-shadow:var(--sh);
+}
+.mc-ic{font-size:1.5rem;margin-bottom:5px}
+.mc-lbl{font-family:var(--font-ui);font-size:.72rem;color:var(--gray);margin-bottom:3px}
+.mc-val{font-family:var(--font-serif);font-size:1.25rem;font-weight:700;color:var(--navy)}
+
+.demo-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:24px}
+.db{
+  padding:12px 16px;background:var(--surface);
+  border:1.5px solid var(--border);border-radius:var(--r);
+  font-family:var(--font-serif);font-size:.9rem;
+  color:var(--text2);cursor:pointer;text-align:left;
+  box-shadow:var(--sh);transition:border-color .13s,background .13s;
+}
+.db:hover{border-color:var(--blue);color:var(--blue-dk);background:var(--blue-lt)}
+
+.nt{
+  width:100%;border-collapse:collapse;
+  font-family:var(--font-serif);font-size:.88rem;
+  background:var(--surface);border-radius:var(--rl);
+  overflow:hidden;box-shadow:var(--sh);
+}
+.nt th{
+  background:var(--blue-lt);color:var(--blue-dk);
+  font-family:var(--font-ui);font-weight:700;
+  padding:9px 16px;text-align:left;
+  font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;
+}
+.nt td{padding:9px 16px;border-top:1px solid var(--border);color:var(--text2)}
+.nt td code{
+  font-family:var(--font-mono);
+  background:var(--gray-lt);padding:2px 6px;
+  border-radius:4px;font-size:.82rem;color:var(--navy);
+}
+
+/* Spinner */
+.spin{
+  display:inline-block;width:15px;height:15px;
+  border:2.5px solid rgba(255,255,255,.3);
+  border-top-color:#fff;border-radius:50%;
+  animation:sp .65s linear infinite;
+}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+@media(max-width:768px){
+  .sb{width:60px;min-width:60px}
+  .sb-brand,.sb-libs,.nb span,.sb-lbl{display:none}
+  .main{padding:18px 14px 40px}
+  .mc-grid{grid-template-columns:1fr 1fr}
+  .demo-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- ════════ SIDEBAR ════════ -->
+<aside class="sb">
+  <div class="sb-brand">
+    <div class="sb-logo">∫</div>
+    <div class="sb-title">MathSolverPy</div>
+    <div class="sb-sub">Akademik matematik dastur</div>
+  </div>
+  <nav class="sb-nav">
+    <span class="sb-lbl">Navigatsiya</span>
+    <button class="nb on" data-pg="home"><span class="ic">🏠</span><span>Bosh sahifa</span></button>
+    <button class="nb" data-pg="algebra"><span class="ic">📐</span><span>Algebra</span></button>
+    <button class="nb" data-pg="analysis"><span class="ic">📈</span><span>Matematik Analiz</span></button>
+    <button class="nb" data-pg="numerical"><span class="ic">🔢</span><span>Sonli Metodlar</span></button>
+    <button class="nb" data-pg="matrix"><span class="ic">🧮</span><span>Matritsa Amallari</span></button>
+  </nav>
+  <div class="sb-libs">
+    <span class="sb-libs-lbl">Kutubxonalar</span>
+    <span class="pill">SymPy</span><span class="pill">NumPy</span>
+    <span class="pill">SciPy</span><span class="pill">Matplotlib</span>
+    <span class="pill">MathJax 3</span>
+  </div>
+</aside>
+
+<!-- ════════ MAIN ════════ -->
+<main class="main">
+
+<!-- ── HOME ── -->
+<section class="pg on" id="pg-home">
+  <div class="home-hero">
+    <h1 class="home-title">Math<span class="ac">Solver</span>Py</h1>
+    <p class="home-sub">Pythonda algebra va analiz masalalarini qadamma-qadam yechish uchun akademik dasturiy ta'minot</p>
+  </div>
+  <div class="mc-grid">
+    <div class="mc"><div class="mc-ic">📐</div><div class="mc-lbl">Algebra</div><div class="mc-val">4 tur</div></div>
+    <div class="mc"><div class="mc-ic">📈</div><div class="mc-lbl">Analiz</div><div class="mc-val">4 tur</div></div>
+    <div class="mc"><div class="mc-ic">🔢</div><div class="mc-lbl">Sonli metodlar</div><div class="mc-val">3 metod</div></div>
+    <div class="mc"><div class="mc-ic">🧮</div><div class="mc-lbl">Matritsa</div><div class="mc-val">3 amal</div></div>
+  </div>
+  <p style="font-family:var(--font-ui);font-size:.78rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);margin-bottom:10px">Tezkor demo</p>
+  <div class="demo-grid">
+    <button class="db" onclick="demo('algebra/quadratic',{equation:'x**2-5*x+6',variable:'x'})">📐 Kvadrat tenglama: \(x^2-5x+6=0\)</button>
+    <button class="db" onclick="demo('analysis/derivative',{function:'sin(x)*x**2',variable:'x',order:1})">📈 Hosila: \(\dfrac{d}{dx}[\sin x \cdot x^2]\)</button>
+    <button class="db" onclick="demo('analysis/integral',{function:'x**2',variable:'x',lower:'0',upper:'1'})">∫ Aniq integral: \(\displaystyle\int_0^1 x^2\,dx\)</button>
+    <button class="db" onclick="demo('numerical/newton',{function:'x**3-x-2',x0:1.5,tol:1e-8,max_iter:50})">🔢 Newton: \(x^3-x-2=0\)</button>
+  </div>
+  <div class="res" id="home-res"></div>
+  <p style="font-family:var(--font-ui);font-size:.78rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);margin:22px 0 10px">Matematik yozuv qo'llanmasi</p>
+  <table class="nt">
+    <thead><tr><th>Ifoda</th><th>Kiritish</th><th>Misol</th></tr></thead>
+    <tbody>
+      <tr><td>\(x^2\)</td><td><code>x^2</code> yoki <code>x**2</code></td><td><code>x^2 + 3*x - 4</code></td></tr>
+      <tr><td>\(\sqrt{x}\)</td><td><code>sqrt(x)</code></td><td><code>sqrt(x+1)</code></td></tr>
+      <tr><td>\(e^x\)</td><td><code>exp(x)</code></td><td><code>exp(-x^2)</code></td></tr>
+      <tr><td>\(\ln x\)</td><td><code>log(x)</code></td><td><code>log(x^2+1)</code></td></tr>
+      <tr><td>\(\sin x,\;\cos x\)</td><td><code>sin(x)</code>, <code>cos(x)</code></td><td><code>sin(x)/x</code></td></tr>
+      <tr><td>\(\pi\)</td><td><code>pi</code></td><td><code>sin(pi*x)</code></td></tr>
+      <tr><td>\(\infty\)</td><td><code>oo</code></td><td>\(x \to \infty\)</td></tr>
+    </tbody>
+  </table>
+</section>
+
+
+<!-- ── ALGEBRA ── -->
+<section class="pg" id="pg-algebra">
+  <div class="mh">
+    <h1 class="mh-title">Algebra Moduli</h1>
+    <p class="mh-sub">Chiziqli va kvadrat tenglamalar · Tengsizliklar · Tenglamalar sistemasi</p>
+  </div>
+  <div class="tabs">
+    <button class="tb on" data-tp="al-lin">Chiziqli</button>
+    <button class="tb"    data-tp="al-quad">Kvadrat</button>
+    <button class="tb"    data-tp="al-ineq">Tengsizlik</button>
+    <button class="tb"    data-tp="al-sys">Sistema</button>
+  </div>
+
+  <div class="tp on" id="al-lin">
+    <div class="ib">Standart shakl: <b>ax + b = 0</b> &nbsp;·&nbsp; Bir noma'lumli birinchi darajali tenglama &nbsp;·&nbsp; Yechim: \(x = -b/a\)</div>
+    <div class="mif-wrap">
+      <span class="mif-label">Matematik ifoda</span>
+      <div class="ex-wrap">
+        <span class="ex-lbl">Tezkor misollar</span>
+        <div class="ex-row">
+          <button class="ex" onclick="si('lin-in','2*x+6=0')">\(2x+6=0\)</button>
+          <button class="ex" onclick="si('lin-in','3*x-9=4')">\(3x-9=4\)</button>
+          <button class="ex" onclick="si('lin-in','5*x+3=2*x-6')">\(5x+3=2x-6\)</button>
+          <button class="ex" onclick="si('lin-in','-4*x+8=0')">\(-4x+8=0\)</button>
+        </div>
+      </div>
+      <input class="mif-input" id="lin-in" value="2*x + 6 = 0" oninput="lp(this,'lin-pv')" placeholder="Misol: 3*x - 9 = 4">
+      <div class="mif-ops">
+        <button class="mif-op" onclick="ins('lin-in','^')"><span class="op-sym">^</span>Daraja</button>
+        <button class="mif-op" onclick="ins('lin-in','/')"><span class="op-sym">/</span>Bo'lish</button>
+        <button class="mif-op" onclick="ins('lin-in','*')"><span class="op-sym">*</span>Ko'paytirish</button>
+        <button class="mif-op" onclick="ins('lin-in','sqrt()')"><span class="op-sym">√</span>Ildiz</button>
+        <button class="mif-op" onclick="ins('lin-in','=')"><span class="op-sym">=</span>Teng</button>
+      </div>
+      <div class="mif-preview" id="lin-pv"><span class="mif-preview-lbl">Vizual ko'rinish</span></div>
+    </div>
+    <button class="sbtn" onclick="solveAlg('linear','lin-in','res-lin')">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+      Yech — Chiziqli tenglama
+    </button>
+    <div class="res" id="res-lin"></div>
+  </div>
+
+  <div class="tp" id="al-quad">
+    <div class="ib">Standart shakl: <b>ax² + bx + c = 0</b> &nbsp;·&nbsp; Diskriminant: \(D = b^2 - 4ac\)</div>
+    <div class="mif-wrap">
+      <span class="mif-label">Matematik ifoda</span>
+      <div class="ex-wrap">
+        <span class="ex-lbl">Tezkor misollar</span>
+        <div class="ex-row">
+          <button class="ex" onclick="si('quad-in','x^2-5*x+6=0')">\(x^2-5x+6=0\)</button>
+          <button class="ex" onclick="si('quad-in','2*x^2+3*x-2=0')">\(2x^2+3x-2=0\)</button>
+          <button class="ex" onclick="si('quad-in','x^2-4*x+4=0')">\(x^2-4x+4=0\)</button>
+          <button class="ex" onclick="si('quad-in','x^2+4=0')">\(x^2+4=0\)</button>
+        </div>
+      </div>
+      <input class="mif-input" id="quad-in" value="x^2 - 5*x + 6 = 0" oninput="lp(this,'quad-pv')">
+      <div class="mif-ops">
+        <button class="mif-op" onclick="ins('quad-in','^')"><span class="op-sym">^</span>Daraja</button>
+        <button class="mif-op" onclick="ins('quad-in','/')"><span class="op-sym">/</span>Bo'lish</button>
+        <button class="mif-op" onclick="ins('quad-in','*')"><span class="op-sym">*</span>Ko'paytirish</button>
+        <button class="mif-op" onclick="ins('quad-in','sqrt()')"><span class="op-sym">√</span>Ildiz</button>
+      </div>
+      <div class="mif-preview" id="quad-pv"><span class="mif-preview-lbl">Vizual ko'rinish</span></div>
+    </div>
+    <button class="sbtn" onclick="solveAlg('quadratic','quad-in','res-quad')">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+      Yech — Kvadrat tenglama
+    </button>
+    <div class="res" id="res-quad"></div>
+  </div>
+
+  <div class="tp" id="al-ineq">
+    <div class="ib">Operatorlar: <b>&gt; &lt; ≥ ≤</b> &nbsp;·&nbsp; Yechim intervallar ko'rinishida qaytariladi</div>
+    <div class="mif-wrap">
+      <span class="mif-label">Matematik ifoda</span>
+      <div class="ex-wrap">
+        <span class="ex-lbl">Tezkor misollar</span>
+        <div class="ex-row">
+          <button class="ex" onclick="si('ineq-in','x^2-4>0')">\(x^2-4>0\)</button>
+          <button class="ex" onclick="si('ineq-in','2*x-3<=5')">\(2x-3 \leq 5\)</button>
+          <button class="ex" onclick="si('ineq-in','x^2+x-6<0')">\(x^2+x-6<0\)</button>
+          <button class="ex" onclick="si('ineq-in','x^2-3*x>=0')">\(x^2-3x \geq 0\)</button>
+        </div>
+      </div>
+      <input class="mif-input" id="ineq-in" value="x^2 - 4 > 0" oninput="lp(this,'ineq-pv')" placeholder="Misol: x^2 - 4 > 0">
+      <div class="mif-ops">
+        <button class="mif-op" onclick="ins('ineq-in','^')"><span class="op-sym">^</span>Daraja</button>
+        <button class="mif-op" onclick="ins('ineq-in','>')"><span class="op-sym">&gt;</span>Katta</button>
+        <button class="mif-op" onclick="ins('ineq-in','<')"><span class="op-sym">&lt;</span>Kichik</button>
+        <button class="mif-op" onclick="ins('ineq-in','>=')"><span class="op-sym">≥</span>Katta-teng</button>
+        <button class="mif-op" onclick="ins('ineq-in','<=')"><span class="op-sym">≤</span>Kichik-teng</button>
+      </div>
+      <div class="mif-preview" id="ineq-pv"><span class="mif-preview-lbl">Vizual ko'rinish</span></div>
+    </div>
+    <button class="sbtn" onclick="solveAlg('inequality','ineq-in','res-ineq')">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+      Yech — Tengsizlik
+    </button>
+    <div class="res" id="res-ineq"></div>
+  </div>
+
+  <div class="tp" id="al-sys">
+    <div class="ib">Bir nechta tenglama va noma'lumlar &nbsp;·&nbsp; Substitusiya va Gauss usullari</div>
+    <div class="mif-wrap">
+      <span class="mif-label">Sistema kiritish</span>
+      <div class="fg">
+        <label class="fl">Tenglamalar soni:</label>
+        <select class="fs" id="sys-n" style="width:130px" onchange="buildSys()">
+          <option value="2">2 ta</option><option value="3">3 ta</option><option value="4">4 ta</option>
+        </select>
+      </div>
+      <div id="sys-eqs"></div>
+      <div class="fg" style="margin-top:8px">
+        <label class="fl">O'zgaruvchilar (vergul bilan):</label>
+        <input class="fi" id="sys-vars" value="x, y" style="width:200px">
+      </div>
+    </div>
+    <button class="sbtn" onclick="solveSys()">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+      Yech — Tenglamalar sistemasi
+    </button>
+    <div class="res" id="res-sys"></div>
+  </div>
+</section>
+
+
+<!-- ── ANALYSIS ── -->
+<section class="pg" id="pg-analysis">
+  <div class="mh">
+    <h1 class="mh-title">Matematik Analiz Moduli</h1>
+    <p class="mh-sub">Limitlar · Hosilalar · Integrallar · Grafik chizish</p>
+  </div>
+  <div class="tabs">
+    <button class="tb on" data-tp="an-lim">Limit</button>
+    <button class="tb"    data-tp="an-der">Hosila</button>
+    <button class="tb"    data-tp="an-int">Integral</button>
+    <button class="tb"    data-tp="an-plt">Grafik</button>
+  </div>
+
+  <div class="tp on" id="an-lim">
+    <div class="ib">\(\displaystyle\lim_{x \to a} f(x)\) &nbsp;·&nbsp; Bir va ikki tomonlama limitlar &nbsp;·&nbsp; Noaniqlik hollari \(\tfrac{0}{0},\;\tfrac{\infty}{\infty}\)</div>
+    <div class="mif-wrap">
+      <span class="mif-label">Matematik ifoda</span>
+      <div class="ex-wrap">
+        <span class="ex-lbl">Tezkor misollar</span>
+        <div class="ex-row">
+          <button class="ex" onclick="si('lim-f','sin(x)/x');si('lim-pt','0')">\(\displaystyle\lim_{x\to 0}\frac{\sin x}{x}\)</button>
+          <button class="ex" onclick="si('lim-f','(x**2-1)/(x-1)');si('lim-pt','1')">\(\displaystyle\lim_{x\to 1}\frac{x^2-1}{x-1}\)</button>
+          <button class="ex" onclick="si('lim-f','(1+1/x)**x');si('lim-pt','oo')">\(\displaystyle\lim_{x\to\infty}\!\left(1+\tfrac{1}{x}\right)^x\)</button>
+          <button class="ex" onclick="si('lim-f','(exp(x)-1)/x');si('lim-pt','0')">\(\displaystyle\lim_{x\to 0}\frac{e^x-1}{x}\)</button>
+        </div>
+      </div>
+      <div class="frow">
+        <div class="fg" style="flex:3">
+          <label class="fl">f(x) =</label>
+          <input class="mif-input" id="lim-f" value="sin(x)/x" oninput="lp(this,'lim-pv')">
+          <div class="mif-ops">
+            <button class="mif-op" onclick="ins('lim-f','^')"><span class="op-sym">^</span>Daraja</button>
+            <button class="mif-op" onclick="ins('lim-f','/')"><span class="op-sym">/</span>Bo'lish</button>
+            <button class="mif-op" onclick="ins('lim-f','exp()')"><span class="op-sym">e^x</span>Eksponent</button>
+            <button class="mif-op" onclick="ins('lim-f','sin()')"><span class="op-sym">sin</span></button>
+            <button class="mif-op" onclick="ins('lim-f','oo')"><span class="op-sym">∞</span>Cheksiz</button>
+          </div>
+          <div class="mif-preview" id="lim-pv"><span class="mif-preview-lbl">Vizual ko'rinish</span></div>
+        </div>
+        <div class="fg" style="flex:1">
+          <label class="fl">x →</label>
+          <input class="fi" id="lim-pt" value="0" placeholder="0, pi, oo">
+        </div>
+      </div>
+      <div class="fg" style="margin-top:8px">
+        <label class="fl">Yo'nalish:</label>
+        <select class="fs" id="lim-dir" style="width:210px">
+          <option value="+-">Ikki tomonga (±)</option>
+          <option value="+">O'ngdan \((x \to a^+)\)</option>
+          <option value="-">Chapdan \((x \to a^-)\)</option>
+        </select>
+      </div>
+    </div>
+    <button class="sbtn" onclick="solveAn('limit')">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+      Limitni hisoblash
+    </button>
+    <div class="res" id="res-lim"></div>
+  </div>
+
+  <div class="tp" id="an-der">
+    <div class="ib">\(f'(x) = \dfrac{d}{dx}[f(x)]\) &nbsp;·&nbsp; \(n\)-tartibli hosilalar &nbsp;·&nbsp; Kritik nuqtalar va extremumlar</div>
+    <div class="mif-wrap">
+      <span class="mif-label">Matematik ifoda</span>
+      <div class="ex-wrap">
+        <span class="ex-lbl">Tezkor misollar</span>
+        <div class="ex-row">
+          <button class="ex" onclick="si('der-f','x**3-2*x**2+x')">\(x^3-2x^2+x\)</button>
+          <button class="ex" onclick="si('der-f','sin(x)*cos(x)')">\(\sin x \cdot \cos x\)</button>
+          <button class="ex" onclick="si('der-f','exp(x**2)')">\(e^{x^2}\)</button>
+          <button class="ex" onclick="si('der-f','log(x**2+1)')">\(\ln(x^2+1)\)</button>
+        </div>
+      </div>
+      <input class="mif-input" id="der-f" value="x**3 - 2*x**2 + x" oninput="lp(this,'der-pv')">
+      <div class="mif-ops">
+        <button class="mif-op" onclick="ins('der-f','^')"><span class="op-sym">^</span>Daraja</button>
+        <button class="mif-op" onclick="ins('der-f','*')"><span class="op-sym">*</span>Ko'paytirish</button>
+        <button class="mif-op" onclick="ins('der-f','sin()')"><span class="op-sym">sin</span></button>
+        <button class="mif-op" onclick="ins('der-f','cos()')"><span class="op-sym">cos</span></button>
+        <button class="mif-op" onclick="ins('der-f','exp()')"><span class="op-sym">e^x</span></button>
+        <button class="mif-op" onclick="ins('der-f','log()')"><span class="op-sym">ln</span></button>
+      </div>
+      <div class="mif-preview" id="der-pv"><span class="mif-preview-lbl">Vizual ko'rinish</span></div>
+      <div class="fg" style="margin-top:10px">
+        <label class="fl">Hosila tartibi:</label>
+        <select class="fs" id="der-ord" style="width:200px">
+          <option value="1">1-tartib \((f')\)</option>
+          <option value="2">2-tartib \((f'')\)</option>
+          <option value="3">3-tartib \((f''')\)</option>
+          <option value="4">4-tartib</option>
+          <option value="5">5-tartib</option>
+        </select>
+      </div>
+    </div>
+    <button class="sbtn" onclick="solveAn('derivative')">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+      Hosilani hisoblash
+    </button>
+    <div class="res" id="res-der"></div>
+  </div>
+
+  <div class="tp" id="an-int">
+    <div class="ib">Noaniq: \(\displaystyle\int f(x)\,dx + C\) &nbsp;·&nbsp; Aniq: \(\displaystyle\int_a^b f(x)\,dx = F(b)-F(a)\) &nbsp;(Nyuton–Leybnits)</div>
+    <div class="mif-wrap">
+      <span class="mif-label">Matematik ifoda</span>
+      <div class="ex-wrap">
+        <span class="ex-lbl">Tezkor misollar</span>
+        <div class="ex-row">
+          <button class="ex" onclick="si('int-f','x**2+2*x')">\(x^2+2x\)</button>
+          <button class="ex" onclick="si('int-f','sin(x)')">\(\sin x\)</button>
+          <button class="ex" onclick="si('int-f','exp(-x**2)')">\(e^{-x^2}\)</button>
+          <button class="ex" onclick="si('int-f','1/(x**2+1)')">\(\dfrac{1}{x^2+1}\)</button>
+        </div>
+      </div>
+      <input class="mif-input" id="int-f" value="x**2 + 2*x" oninput="lp(this,'int-pv')">
+      <div class="mif-ops">
+        <button class="mif-op" onclick="ins('int-f','^')"><span class="op-sym">^</span>Daraja</button>
+        <button class="mif-op" onclick="ins('int-f','/')"><span class="op-sym">/</span>Bo'lish</button>
+        <button class="mif-op" onclick="ins('int-f','sin()')"><span class="op-sym">sin</span></button>
+        <button class="mif-op" onclick="ins('int-f','cos()')"><span class="op-sym">cos</span></button>
+        <button class="mif-op" onclick="ins('int-f','exp()')"><span class="op-sym">e^x</span></button>
+      </div>
+      <div class="mif-preview" id="int-pv"><span class="mif-preview-lbl">Vizual ko'rinish</span></div>
+      <div class="fg" style="margin-top:10px">
+        <label class="fl">Integral turi:</label>
+        <select class="fs" id="int-type" style="width:250px" onchange="toggleBounds()">
+          <option value="indefinite">Noaniq &nbsp;\(\int f(x)\,dx\)</option>
+          <option value="definite">Aniq &nbsp;\(\int_a^b f(x)\,dx\)</option>
+        </select>
+      </div>
+      <div id="int-bounds" style="display:none">
+        <div class="frow" style="margin-top:8px">
+          <div class="fg">
+            <label class="fl">Quyi chegara \(a\):</label>
+            <input class="fi" id="int-lo" value="0" placeholder="0, -pi">
+          </div>
+          <div class="fg">
+            <label class="fl">Yuqori chegara \(b\):</label>
+            <input class="fi" id="int-hi" value="1" placeholder="1, pi, oo">
+          </div>
+        </div>
+      </div>
+    </div>
+    <button class="sbtn" onclick="solveAn('integral')">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+      Integralni hisoblash
+    </button>
+    <div class="res" id="res-int"></div>
+  </div>
+
+  <div class="tp" id="an-plt">
+    <div class="ib">Funksiya grafigi &nbsp;·&nbsp; Kritik nuqtalar belgilanadi &nbsp;·&nbsp; \([x_{\min},\, x_{\max}]\) oraliq boshqariladi</div>
+    <div class="mif-wrap">
+      <span class="mif-label">Matematik ifoda</span>
+      <div class="ex-wrap">
+        <span class="ex-lbl">Tezkor misollar</span>
+        <div class="ex-row">
+          <button class="ex" onclick="si('plt-f','sin(x)*exp(-x/5)')">\(\sin x \cdot e^{-x/5}\)</button>
+          <button class="ex" onclick="si('plt-f','x**3-3*x')">\(x^3-3x\)</button>
+          <button class="ex" onclick="si('plt-f','1/(x**2+1)')">\(\dfrac{1}{x^2+1}\)</button>
+          <button class="ex" onclick="si('plt-f','Abs(x)-1')">\(|x|-1\)</button>
+        </div>
+      </div>
+      <input class="mif-input" id="plt-f" value="sin(x)*exp(-x/5)" oninput="lp(this,'plt-pv')">
+      <div class="mif-ops">
+        <button class="mif-op" onclick="ins('plt-f','^')"><span class="op-sym">^</span>Daraja</button>
+        <button class="mif-op" onclick="ins('plt-f','sin()')"><span class="op-sym">sin</span></button>
+        <button class="mif-op" onclick="ins('plt-f','cos()')"><span class="op-sym">cos</span></button>
+        <button class="mif-op" onclick="ins('plt-f','exp()')"><span class="op-sym">e^x</span></button>
+        <button class="mif-op" onclick="ins('plt-f','Abs()')"><span class="op-sym">|x|</span>Modul</button>
+        <button class="mif-op" onclick="ins('plt-f','sqrt()')"><span class="op-sym">√</span>Ildiz</button>
+      </div>
+      <div class="mif-preview" id="plt-pv"><span class="mif-preview-lbl">Vizual ko'rinish</span></div>
+      <div class="frow" style="margin-top:10px">
+        <div class="fg"><label class="fl">\(x_{\min}\):</label><input class="fi" id="plt-xmin" value="-10" type="number" step="1" style="width:90px"></div>
+        <div class="fg"><label class="fl">\(x_{\max}\):</label><input class="fi" id="plt-xmax" value="10"  type="number" step="1" style="width:90px"></div>
+      </div>
+    </div>
+    <button class="sbtn" onclick="solveAn('plot')">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="14" rx="2"/><line x1="7" y1="21" x2="7" y2="17"/><line x1="17" y1="21" x2="17" y2="17"/><line x1="3" y1="21" x2="21" y2="21"/></svg>
+      Grafik chizish
+    </button>
+    <div class="res" id="res-plt"></div>
+  </div>
+</section>
+
+
+<!-- ── NUMERICAL ── -->
+<section class="pg" id="pg-numerical">
+  <div class="mh">
+    <h1 class="mh-title">Sonli Metodlar Moduli</h1>
+    <p class="mh-sub">Nyuton–Rafson · Biseksiya · Oddiy iteratsiya</p>
+  </div>
+  <div class="tabs">
+    <button class="tb on" data-tp="nu-nw">Nyuton–Rafson</button>
+    <button class="tb"    data-tp="nu-bs">Biseksiya</button>
+    <button class="tb"    data-tp="nu-fi">Oddiy iteratsiya</button>
+  </div>
+
+  <div class="tp on" id="nu-nw">
+    <div class="ib">\(x_{n+1} = x_n - \dfrac{f(x_n)}{f'(x_n)}\) &nbsp;·&nbsp; Kvadratik yaqinlashish &nbsp;·&nbsp; \(f'(x) \neq 0\) shart</div>
+    <div class="mif-wrap">
+      <span class="mif-label">Matematik ifoda</span>
+      <div class="ex-wrap">
+        <span class="ex-lbl">Tezkor misollar</span>
+        <div class="ex-row">
+          <button class="ex" onclick="si('nw-f','x**3-x-2')">\(x^3-x-2=0\)</button>
+          <button class="ex" onclick="si('nw-f','cos(x)-x')">\(\cos x - x = 0\)</button>
+          <button class="ex" onclick="si('nw-f','x**2-2')">\(x^2-2=0\)</button>
+          <button class="ex" onclick="si('nw-f','exp(x)-3')">\(e^x-3=0\)</button>
+        </div>
+      </div>
+      <input class="mif-input" id="nw-f" value="x**3 - x - 2" oninput="lp(this,'nw-pv')">
+      <div class="mif-ops">
+        <button class="mif-op" onclick="ins('nw-f','^')"><span class="op-sym">^</span>Daraja</button>
+        <button class="mif-op" onclick="ins('nw-f','/')"><span class="op-sym">/</span>Bo'lish</button>
+        <button class="mif-op" onclick="ins('nw-f','exp()')"><span class="op-sym">e^x</span></button>
+        <button class="mif-op" onclick="ins('nw-f','cos()')"><span class="op-sym">cos</span></button>
+        <button class="mif-op" onclick="ins('nw-f','sin()')"><span class="op-sym">sin</span></button>
+      </div>
+      <div class="mif-preview" id="nw-pv"><span class="mif-preview-lbl">Vizual ko'rinish</span></div>
+      <div class="frow" style="margin-top:10px">
+        <div class="fg"><label class="fl">Boshlang'ich \(x_0\):</label><input class="fi" id="nw-x0" value="1.5" type="number" step="0.5" style="width:100px"></div>
+        <div class="fg"><label class="fl">Aniqlik \(\varepsilon\):</label>
+          <select class="fs" id="nw-tol" style="width:110px">
+            <option value="0.0001">\(10^{-4}\)</option>
+            <option value="0.000001" selected>\(10^{-6}\)</option>
+            <option value="0.00000001">\(10^{-8}\)</option>
+            <option value="0.0000000001">\(10^{-10}\)</option>
+          </select>
+        </div>
+        <div class="fg"><label class="fl">Maks. iteratsiya:</label><input class="fi" id="nw-max" value="50" type="number" min="5" max="200" step="5" style="width:90px"></div>
+      </div>
+    </div>
+    <button class="sbtn" onclick="solveNum('newton')">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+      Nyuton metodini ishga tushirish
+    </button>
+    <div class="res" id="res-nw"></div>
+  </div>
+
+  <div class="tp" id="nu-bs">
+    <div class="ib">Shart: \(f(a)\cdot f(b) < 0\) &nbsp;·&nbsp; Har doim yaqinlashadi &nbsp;·&nbsp; Bolzano teoremasi</div>
+    <div class="mif-wrap">
+      <span class="mif-label">Matematik ifoda</span>
+      <div class="ex-wrap">
+        <span class="ex-lbl">Tezkor misollar</span>
+        <div class="ex-row">
+          <button class="ex" onclick="si('bs-f','x**3-x-2');si('bs-a','1');si('bs-b','2')">\(x^3-x-2,\;[1,2]\)</button>
+          <button class="ex" onclick="si('bs-f','x**2-2');si('bs-a','1');si('bs-b','2')">\(x^2-2,\;[1,2]\)</button>
+          <button class="ex" onclick="si('bs-f','sin(x)-x/2');si('bs-a','1');si('bs-b','2')">\(\sin x - \tfrac{x}{2},\;[1,2]\)</button>
+          <button class="ex" onclick="si('bs-f','exp(x)-3');si('bs-a','0');si('bs-b','2')">\(e^x-3,\;[0,2]\)</button>
+        </div>
+      </div>
+      <input class="mif-input" id="bs-f" value="x**3 - x - 2" oninput="lp(this,'bs-pv')">
+      <div class="mif-ops">
+        <button class="mif-op" onclick="ins('bs-f','^')"><span class="op-sym">^</span>Daraja</button>
+        <button class="mif-op" onclick="ins('bs-f','/')"><span class="op-sym">/</span>Bo'lish</button>
+        <button class="mif-op" onclick="ins('bs-f','exp()')"><span class="op-sym">e^x</span></button>
+        <button class="mif-op" onclick="ins('bs-f','sin()')"><span class="op-sym">sin</span></button>
+      </div>
+      <div class="mif-preview" id="bs-pv"><span class="mif-preview-lbl">Vizual ko'rinish</span></div>
+      <div class="frow" style="margin-top:10px">
+        <div class="fg"><label class="fl">Chap chegara \(a\):</label><input class="fi" id="bs-a" value="1" type="number" step="0.5" style="width:90px"></div>
+        <div class="fg"><label class="fl">O'ng chegara \(b\):</label><input class="fi" id="bs-b" value="2" type="number" step="0.5" style="width:90px"></div>
+        <div class="fg"><label class="fl">Aniqlik \(\varepsilon\):</label>
+          <select class="fs" id="bs-tol" style="width:110px">
+            <option value="0.0001">\(10^{-4}\)</option>
+            <option value="0.000001" selected>\(10^{-6}\)</option>
+            <option value="0.00000001">\(10^{-8}\)</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <button class="sbtn" onclick="solveNum('bisection')">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+      Biseksiya metodini ishga tushirish
+    </button>
+    <div class="res" id="res-bs"></div>
+  </div>
+
+  <div class="tp" id="nu-fi">
+    <div class="ib">\(x_{n+1} = \varphi(x_n)\) &nbsp;·&nbsp; Yaqinlashish sharti: \(|\varphi'(x)| < 1\) &nbsp;·&nbsp; \(f(x)=0\) ni \(x=\varphi(x)\) ga keltiring</div>
+    <div class="mif-wrap">
+      <span class="mif-label">Matematik ifoda</span>
+      <div class="ex-wrap">
+        <span class="ex-lbl">Tezkor misollar</span>
+        <div class="ex-row">
+          <button class="ex" onclick="si('fi-f','(x+2/x)/2')">\(\varphi = \tfrac{x+2/x}{2} \;\to\; \sqrt{2}\)</button>
+          <button class="ex" onclick="si('fi-f','cos(x)')">\(\varphi = \cos x\)</button>
+          <button class="ex" onclick="si('fi-f','(2+x**2)**(1/3)')">\(\varphi = \sqrt[3]{x^2+2}\)</button>
+        </div>
+      </div>
+      <input class="mif-input" id="fi-f" value="(x+2/x)/2" oninput="lp(this,'fi-pv')">
+      <div class="mif-ops">
+        <button class="mif-op" onclick="ins('fi-f','^')"><span class="op-sym">^</span>Daraja</button>
+        <button class="mif-op" onclick="ins('fi-f','/')"><span class="op-sym">/</span>Bo'lish</button>
+        <button class="mif-op" onclick="ins('fi-f','cos()')"><span class="op-sym">cos</span></button>
+        <button class="mif-op" onclick="ins('fi-f','sin()')"><span class="op-sym">sin</span></button>
+      </div>
+      <div class="mif-preview" id="fi-pv"><span class="mif-preview-lbl">Vizual ko'rinish</span></div>
+      <div class="frow" style="margin-top:10px">
+        <div class="fg"><label class="fl">Boshlang'ich \(x_0\):</label><input class="fi" id="fi-x0" value="1.5" type="number" step="0.5" style="width:100px"></div>
+        <div class="fg"><label class="fl">Aniqlik \(\varepsilon\):</label>
+          <select class="fs" id="fi-tol" style="width:110px">
+            <option value="0.0001">\(10^{-4}\)</option>
+            <option value="0.000001" selected>\(10^{-6}\)</option>
+            <option value="0.00000001">\(10^{-8}\)</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <button class="sbtn" onclick="solveNum('fixedpoint')">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+      Iteratsiyani ishga tushirish
+    </button>
+    <div class="res" id="res-fi"></div>
+  </div>
+</section>
+
+
+<!-- ── MATRIX ── -->
+<section class="pg" id="pg-matrix">
+  <div class="mh">
+    <h1 class="mh-title">Matritsa Amallari Moduli</h1>
+    <p class="mh-sub">Determinant · Teskari matritsa · Gauss usuli (\(Ax = b\))</p>
+  </div>
+  <div class="tabs">
+    <button class="tb on" data-tp="ma-det">Determinant</button>
+    <button class="tb"    data-tp="ma-inv">Teskari matritsa</button>
+    <button class="tb"    data-tp="ma-sys">Ax = b</button>
+  </div>
+
+  <!-- Determinant — n×n only, but UI allows any size input -->
+  <div class="tp on" id="ma-det">
+    <div class="ib">Faqat <b>kvadrat</b> matritsa uchun &nbsp;·&nbsp; \(2\times2\): \(ad-bc\) &nbsp;·&nbsp; \(3\times3\): Sarrus &nbsp;·&nbsp; \(n\times n\): LU yoyilmasi</div>
+    <div class="mif-wrap">
+      <span class="mif-label">Matritsa kiritish</span>
+      <div class="mat-ctrl">
+        <div class="fg"><label class="fl">O'lcham \(n\times n\):</label>
+          <select class="fs" id="det-n" style="width:80px" onchange="buildMat('det',true)">
+            <option value="2">2×2</option><option value="3" selected>3×3</option>
+            <option value="4">4×4</option><option value="5">5×5</option><option value="6">6×6</option>
+          </select>
+        </div>
+        <button class="mat-btn outline" onclick="clearMat('det')">Tozalash</button>
+        <button class="mat-btn primary" onclick="exMat('det',true)">Misol yuklash</button>
+      </div>
+      <div id="det-mat"></div>
+    </div>
+    <button class="sbtn" style="margin-top:14px" onclick="solveMat('determinant','det',true)">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+      Determinantni hisoblash
+    </button>
+    <div class="res" id="res-det"></div>
+  </div>
+
+  <!-- Inverse — n×n only -->
+  <div class="tp" id="ma-inv">
+    <div class="ib">Joriy–Gauss: \([A \mid I] \to [I \mid A^{-1}]\) &nbsp;·&nbsp; \(\det(A)\neq 0\) shart &nbsp;·&nbsp; Tekshirish: \(A \cdot A^{-1} = I\)</div>
+    <div class="mif-wrap">
+      <span class="mif-label">Matritsa kiritish</span>
+      <div class="mat-ctrl">
+        <div class="fg"><label class="fl">O'lcham \(n\times n\):</label>
+          <select class="fs" id="inv-n" style="width:80px" onchange="buildMat('inv',true)">
+            <option value="2">2×2</option><option value="3" selected>3×3</option>
+            <option value="4">4×4</option><option value="5">5×5</option><option value="6">6×6</option>
+          </select>
+        </div>
+        <button class="mat-btn outline" onclick="clearMat('inv')">Tozalash</button>
+        <button class="mat-btn primary" onclick="exMat('inv',true)">Misol yuklash</button>
+      </div>
+      <div id="inv-mat"></div>
+    </div>
+    <button class="sbtn" style="margin-top:14px" onclick="solveMat('inverse','inv',true)">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+      Teskari matritsani hisoblash
+    </button>
+    <div class="res" id="res-inv"></div>
+  </div>
+
+  <!-- Ax=b — m×n fully supported -->
+  <div class="tp" id="ma-sys">
+    <div class="ib">
+      Gauss eliminatsiyasi &nbsp;·&nbsp; <b>m×n</b> matritsalar to'liq qo'llab-quvvatlanadi<br>
+      \(m = n\): yagona yechim &nbsp;·&nbsp; \(m > n\): ortiq aniq &nbsp;·&nbsp; \(m < n\): kam aniq (erkin o'zgaruvchilar)
+    </div>
+    <div class="mif-wrap">
+      <span class="mif-label">A va b kiritish</span>
+      <div class="mat-ctrl" style="flex-wrap:wrap;row-gap:8px">
+        <div class="fg"><label class="fl">Qatorlar \(m\):</label>
+          <select class="fs" id="sys-m" style="width:68px" onchange="buildMatSys()">
+            <option value="2">2</option><option value="3" selected>3</option>
+            <option value="4">4</option><option value="5">5</option><option value="6">6</option>
+          </select>
+        </div>
+        <div class="fg"><label class="fl">Ustunlar \(n\):</label>
+          <select class="fs" id="sys-n" style="width:68px" onchange="buildMatSys()">
+            <option value="2">2</option><option value="3" selected>3</option>
+            <option value="4">4</option><option value="5">5</option><option value="6">6</option>
+          </select>
+        </div>
+        <button class="mat-btn primary" onclick="exMatSys()">Misol yuklash</button>
+      </div>
+      <div style="display:flex;gap:28px;align-items:flex-start;flex-wrap:wrap;margin-top:6px">
+        <div><span class="mat-lbl">\(A\) — Koeffitsientlar (\(m \times n\))</span><div id="sys-A"></div></div>
+        <div><span class="mat-lbl">\(b\) — Erkin hadlar (\(m \times 1\))</span><div id="sys-b"></div></div>
+      </div>
+    </div>
+    <button class="sbtn" style="margin-top:14px" onclick="solveMatSys()">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+      Gauss usuli bilan yechish
+    </button>
+    <div class="res" id="res-msys"></div>
+  </div>
+</section>
+
+</main>
+
+<!-- ════════════════════════════════════════════════
+     JAVASCRIPT
+     ════════════════════════════════════════════════ -->
+<script>
+// ── Navigation ────────────────────────────────────────────────────────────
+document.querySelectorAll('.nb').forEach(b=>{
+  b.addEventListener('click',()=>{
+    document.querySelectorAll('.nb').forEach(x=>x.classList.remove('on'));
+    document.querySelectorAll('.pg').forEach(x=>x.classList.remove('on'));
+    b.classList.add('on');
+    document.getElementById('pg-'+b.dataset.pg).classList.add('on');
+  });
+});
+
+// ── Tabs ──────────────────────────────────────────────────────────────────
+document.querySelectorAll('.tb').forEach(b=>{
+  b.addEventListener('click',()=>{
+    const pg=b.closest('.pg')||b.closest('section');
+    pg.querySelectorAll('.tb').forEach(x=>x.classList.remove('on'));
+    pg.querySelectorAll('.tp').forEach(x=>x.classList.remove('on'));
+    b.classList.add('on');
+    document.getElementById(b.dataset.tp).classList.add('on');
+  });
+});
+
+// ── Utilities ─────────────────────────────────────────────────────────────
+function si(id,v){
+  const el=document.getElementById(id);
+  if(!el)return;
+  el.value=v;
+  el.dispatchEvent(new Event('input'));
+}
+
+// Insert at cursor position
+function ins(id,text){
+  const el=document.getElementById(id);
+  if(!el)return;
+  const s=el.selectionStart, e=el.selectionEnd;
+  el.value=el.value.slice(0,s)+text+el.value.slice(e);
+  const pos=s+text.length-(text.endsWith(')')?1:0);
+  el.setSelectionRange(pos,pos);
+  el.focus();
+  el.dispatchEvent(new Event('input'));
+}
+
+function pre(expr){
+  return expr.replace(/\^/g,'**').replace(/(\d)([a-zA-Z])/g,'$1*$2');
+}
+
+// ── Live LaTeX preview ────────────────────────────────────────────────────
+const ltxCache={};
+function lp(inp,pvId){
+  const raw=inp.value.trim(), wrap=document.getElementById(pvId);
+  if(!wrap)return;
+  if(!raw){
+    wrap.innerHTML='<span class="mif-preview-lbl">Vizual ko\'rinish</span>';
+    wrap.className='mif-preview';return;
+  }
+  if(ltxCache[raw]!==undefined){renderPv(wrap,ltxCache[raw]);return;}
+  fetch('/api/latex',{
+    method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({expr:raw})
+  }).then(r=>r.json()).then(d=>{
+    ltxCache[raw]=d.latex||'';
+    renderPv(wrap,d.latex||'');
+  }).catch(()=>{wrap.className='mif-preview error';
+    wrap.innerHTML='<span class="mif-preview-lbl">Vizual ko\'rinish</span><span class="mif-preview-err">Ifoda tahlil qilinmadi</span>';});
+}
+
+function renderPv(wrap,ltx){
+  if(!ltx){
+    wrap.className='mif-preview error';
+    wrap.innerHTML='<span class="mif-preview-lbl">Vizual ko\'rinish</span><span class="mif-preview-err">Ifoda tahlil qilinmadi — sintaksisni tekshiring</span>';
+    return;
+  }
+  wrap.className='mif-preview';
+  wrap.innerHTML='<span class="mif-preview-lbl">Vizual ko\'rinish</span><div>$$'+ltx+'$$</div>';
+  if(window.MathJax)MathJax.typesetPromise([wrap]);
+}
+
+// ── System equation inputs ────────────────────────────────────────────────
+const SD=[['x+y=5','2*x-y=1'],['x+y+z=6','2*x-y+z=3','x+2*y-z=2'],
+          ['x+y+z+w=10','2*x-y+z-w=1','x+2*y-z+w=6','x-y+2*z+2*w=8']];
+const SV=['x, y','x, y, z','x, y, z, w'];
+function buildSys(){
+  const n=parseInt(document.getElementById('sys-n').value);
+  const box=document.getElementById('sys-eqs'); box.innerHTML='';
+  SD[n-2].forEach((d,i)=>{
+    const g=document.createElement('div'); g.className='fg'; g.style.marginBottom='2px';
+    g.innerHTML=`<label class="fl">Tenglama ${i+1}:</label>
+      <input class="mif-input" id="se-${i}" value="${d}" oninput="lp(this,'sp-${i}')">
+      <div class="mif-ops">
+        <button class="mif-op" onclick="ins('se-${i}','^')"><span class="op-sym">^</span>Daraja</button>
+        <button class="mif-op" onclick="ins('se-${i}','=')"><span class="op-sym">=</span>Teng</button>
+      </div>
+      <div class="mif-preview" id="sp-${i}"><span class="mif-preview-lbl">Vizual ko'rinish</span></div>`;
+    box.appendChild(g);
+    setTimeout(()=>document.getElementById(`se-${i}`).dispatchEvent(new Event('input')),60);
+  });
+  document.getElementById('sys-vars').value=SV[n-2];
+}
+
+// ── Matrix builder ────────────────────────────────────────────────────────
+function buildMat(pfx,sq){
+  const n=parseInt(document.getElementById(pfx+'-n').value);
+  const c=sq?n:1;
+  const box=document.getElementById(pfx+'-mat'); box.innerHTML='';
+  const tbl=document.createElement('table'); tbl.className='mat-grid';
+  for(let i=0;i<n;i++){
+    const tr=document.createElement('tr');
+    for(let j=0;j<c;j++){
+      const td=document.createElement('td');
+      td.innerHTML=`<input type="number" step="1" value="0" id="${pfx}-${i}-${j}">`;
+      tr.appendChild(td);
+    }
+    tbl.appendChild(tr);
+  }
+  const wrap=document.createElement('div'); wrap.className='mat-bracket';
+  const lb=document.createElement('span'); lb.className='mat-par'; lb.textContent='[';
+  const rb=lb.cloneNode(); rb.textContent=']';
+  wrap.appendChild(lb); wrap.appendChild(tbl); wrap.appendChild(rb);
+  box.appendChild(wrap);
+}
+
+function clearMat(pfx){
+  const n=parseInt(document.getElementById(pfx+'-n').value);
+  for(let i=0;i<n;i++)for(let j=0;j<n;j++){
+    const el=document.getElementById(`${pfx}-${i}-${j}`);
+    if(el)el.value=0;
+  }
+}
+
+function exMat(pfx,sq){
+  const ex=[[1,2,3],[0,4,5],[1,0,6]];
+  const n=parseInt(document.getElementById(pfx+'-n').value);
+  for(let i=0;i<n;i++)for(let j=0;j<n;j++){
+    const el=document.getElementById(`${pfx}-${i}-${j}`);
+    if(el)el.value=(i<3&&j<3)?ex[i][j]:(i===j?1:0);
+  }
+}
+
+function getMat(pfx,r,c){
+  const m=[];
+  for(let i=0;i<r;i++){const row=[];
+    for(let j=0;j<c;j++){
+      const el=document.getElementById(`${pfx}-${i}-${j}`);
+      row.push(el?parseFloat(el.value)||0:0);
+    }
+    m.push(row);
+  }
+  return m;
+}
+
+// n×m system
+function buildMatSys(){
+  const m=parseInt(document.getElementById('sys-m').value);
+  const n=parseInt(document.getElementById('sys-n').value);
+  buildMatCustom('sys-A',m,n); buildMatCustom('sys-b',m,1);
+}
+
+function buildMatCustom(cid,r,c){
+  const box=document.getElementById(cid); box.innerHTML='';
+  const tbl=document.createElement('table'); tbl.className='mat-grid';
+  for(let i=0;i<r;i++){const tr=document.createElement('tr');
+    for(let j=0;j<c;j++){
+      const td=document.createElement('td');
+      td.innerHTML=`<input type="number" step="1" value="0" id="${cid}-${i}-${j}">`;
+      tr.appendChild(td);
+    }
+    tbl.appendChild(tr);
+  }
+  const wrap=document.createElement('div'); wrap.className='mat-bracket';
+  const lb=document.createElement('span'); lb.className='mat-par'; lb.textContent='[';
+  const rb=lb.cloneNode(); rb.textContent=']';
+  wrap.appendChild(lb); wrap.appendChild(tbl); wrap.appendChild(rb);
+  box.appendChild(wrap);
+}
+
+function exMatSys(){
+  const m=parseInt(document.getElementById('sys-m').value);
+  const n=parseInt(document.getElementById('sys-n').value);
+  const exA={
+    '2-2':[[2,1],[5,3]],'3-3':[[2,1,1],[4,3,3],[8,7,9]],
+    '3-2':[[1,0],[0,1],[1,1]],'2-3':[[1,2,1],[0,1,2]],
+    '4-4':[[2,1,0,0],[1,3,1,0],[0,1,3,1],[0,0,1,2]]
+  };
+  const exb={
+    '2-2':[[4],[7]],'3-3':[[1],[1],[1]],'3-2':[[1],[2],[3]],'2-3':[[4],[3]],
+    '4-4':[[1],[2],[3],[4]]
+  };
+  const key=`${m}-${n}`;
+  const A=exA[key]||Array.from({length:m},(_,i)=>Array.from({length:n},(_,j)=>i===j?1:0));
+  const b=exb[key]||Array.from({length:m},()=>[1]);
+  for(let i=0;i<m;i++)for(let j=0;j<n;j++){
+    const el=document.getElementById(`sys-A-${i}-${j}`);
+    if(el)el.value=(i<A.length&&j<A[i].length)?A[i][j]:0;
+  }
+  for(let i=0;i<m;i++){
+    const el=document.getElementById(`sys-b-${i}-0`);
+    if(el)el.value=(i<b.length)?b[i][0]:0;
+  }
+}
+
+// ── Toggle integral bounds ────────────────────────────────────────────────
+function toggleBounds(){
+  const t=document.getElementById('int-type').value;
+  document.getElementById('int-bounds').style.display=t==='definite'?'block':'none';
+}
+
+// ── Loading state ─────────────────────────────────────────────────────────
+function setLoad(btn,on){
+  if(!btn)return;
+  if(on){btn.classList.add('loading');btn._html=btn.innerHTML;
+    btn.innerHTML='<span class="spin"></span> Hisoblanmoqda...';}
+  else{btn.classList.remove('loading');if(btn._html)btn.innerHTML=btn._html;}
+}
+
+// ── API call ──────────────────────────────────────────────────────────────
+async function api(ep,payload){
+  const r=await fetch('/api/'+ep,{
+    method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify(payload)
+  });
+  if(!r.ok)throw new Error(`Server xatosi ${r.status}`);
+  return r.json();
+}
+
+// ── Render ────────────────────────────────────────────────────────────────
+function scls(title){
+  const t=(title||'').toLowerCase();
+  if(/qoid|formula|teorema|rule|qoida/.test(t))return 'rl';
+  if(/tekshir|check|natija|xulosa/.test(t))return 'ck';
+  return '';
+}
+
+function renderRes(id,data){
+  const box=document.getElementById(id);
+  if(!box)return;
+  if(data.error){
+    box.innerHTML=`<div class="err"><strong>Xato:</strong> ${data.error}</div>`;
+    return;
+  }
+  let h='';
+
+  if(data.answer_latex){
+    h+=`<div class="ans-block">
+      <div class="ans-tag">✓ Javob</div>
+      <div class="ans-ltx" id="${id}-ans">$$${data.answer_latex}$$</div>
+      ${data.extra_info?`<div class="ans-extra">${data.extra_info}</div>`:''}
+    </div>`;
+  }
+
+  if(data.steps&&data.steps.length){
+    h+=`<div class="steps-hd">Qadamma-qadam yechim</div>`;
+    data.steps.forEach(s=>{
+      const cls=scls(s.title);
+      const body=(s.content||'').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      h+=`<div class="sc ${cls}">
+        <span class="sc-badge">Qadam ${s.step}</span>
+        <div class="sc-title">${s.title||''}</div>
+        <div class="sc-body">${body}</div>
+        ${s.latex?`<div class="sc-ltx" id="${id}-s${s.step}">$$${s.latex}$$</div>`:''}
+      </div>`;
+    });
+  }
+
+  if(data.plot){
+    h+=`<img src="data:image/png;base64,${data.plot}" class="plot-img" alt="Grafik">`;
+  }
+
+  if(data.table&&data.table.length){
+    const tbl=data.table.slice(0,30);
+    const n=tbl[0].length;
+    const hds=n===5?['n','xₙ','f(xₙ)','xₙ₊₁','|xₙ₊₁−xₙ|']:
+                    ['n','a','b','(a+b)/2','f(c)','|b−a|/2'];
+    const tid=id+'-t';
+    h+=`<div class="it-wrap">
+      <div class="it-head" onclick="document.getElementById('${tid}').classList.toggle('open')">
+        <span>Iteratsiya jadvali — ${tbl.length} qadam</span><span>▼</span>
+      </div>
+      <div class="it-body" id="${tid}">
+        <table>
+          <thead><tr>${hds.map(hd=>`<th>${hd}</th>`).join('')}</tr></thead>
+          <tbody>${tbl.map(row=>`<tr>${row.map((v,i)=>`<td>${typeof v==='number'&&i>0?v.toExponential(3):v}</td>`).join('')}</tr>`).join('')}</tbody>
+        </table>
+      </div>
+    </div>`;
+  }
+
+  box.innerHTML=h;
+  if(window.MathJax)MathJax.typesetPromise([box]);
+}
+
+function renderErr(id,msg){
+  const box=document.getElementById(id);
+  if(box)box.innerHTML=`<div class="err"><strong>Xato:</strong> ${msg}</div>`;
+}
+
+// ── Solve functions ───────────────────────────────────────────────────────
+async function solveAlg(type,inputId,resId){
+  const btn=event.currentTarget; setLoad(btn,true);
+  const val=document.getElementById(inputId).value;
+  let payload;
+  if(type==='inequality') payload={inequality:val,variable:'x'};
+  else                     payload={equation:val,variable:'x'};
+  try{renderRes(resId,await api('algebra/'+type,payload));}
+  catch(e){renderErr(resId,e.message);}
+  setLoad(btn,false);
+}
+
+async function solveSys(){
+  const btn=event.currentTarget; setLoad(btn,true);
+  const n=parseInt(document.getElementById('sys-n').value);
+  const eqs=Array.from({length:n},(_,i)=>document.getElementById(`se-${i}`)?.value||'');
+  const vars=document.getElementById('sys-vars').value.split(',').map(v=>v.trim());
+  try{renderRes('res-sys',await api('algebra/system',{equations:eqs,variables:vars}));}
+  catch(e){renderErr('res-sys',e.message);}
+  setLoad(btn,false);
+}
+
+async function solveAn(type){
+  const btn=event.currentTarget; setLoad(btn,true);
+  let payload,resId;
+  if(type==='limit'){
+    payload={function:document.getElementById('lim-f').value,
+             point:document.getElementById('lim-pt').value,
+             direction:document.getElementById('lim-dir').value,variable:'x'};
+    resId='res-lim';
+  }else if(type==='derivative'){
+    payload={function:document.getElementById('der-f').value,
+             variable:'x',order:parseInt(document.getElementById('der-ord').value)};
+    resId='res-der';
+  }else if(type==='integral'){
+    const it=document.getElementById('int-type').value;
+    payload={function:document.getElementById('int-f').value,variable:'x',
+             lower:it==='definite'?document.getElementById('int-lo').value:'',
+             upper:it==='definite'?document.getElementById('int-hi').value:''};
+    resId='res-int';
+  }else{
+    payload={function:document.getElementById('plt-f').value,
+             xmin:parseFloat(document.getElementById('plt-xmin').value),
+             xmax:parseFloat(document.getElementById('plt-xmax').value),variable:'x'};
+    resId='res-plt';
+  }
+  try{renderRes(resId,await api('analysis/'+type,payload));}
+  catch(e){renderErr(resId,e.message);}
+  setLoad(btn,false);
+}
+
+async function solveNum(type){
+  const btn=event.currentTarget; setLoad(btn,true);
+  let payload,resId;
+  if(type==='newton'){
+    payload={function:document.getElementById('nw-f').value,
+             x0:parseFloat(document.getElementById('nw-x0').value),
+             tol:parseFloat(document.getElementById('nw-tol').value),
+             max_iter:parseInt(document.getElementById('nw-max').value)};
+    resId='res-nw';
+  }else if(type==='bisection'){
+    payload={function:document.getElementById('bs-f').value,
+             a:parseFloat(document.getElementById('bs-a').value),
+             b:parseFloat(document.getElementById('bs-b').value),
+             tol:parseFloat(document.getElementById('bs-tol').value)};
+    resId='res-bs';
+  }else{
+    payload={phi:document.getElementById('fi-f').value,
+             x0:parseFloat(document.getElementById('fi-x0').value),
+             tol:parseFloat(document.getElementById('fi-tol').value)};
+    resId='res-fi';
+  }
+  try{renderRes(resId,await api('numerical/'+type,payload));}
+  catch(e){renderErr(resId,e.message);}
+  setLoad(btn,false);
+}
+
+async function solveMat(type,pfx,sq){
+  const btn=event.currentTarget; setLoad(btn,true);
+  const n=parseInt(document.getElementById(pfx+'-n').value);
+  const mat=getMat(pfx,n,n);
+  const resId='res-'+(pfx==='det'?'det':'inv');
+  try{renderRes(resId,await api('matrix/'+type,{matrix:mat}));}
+  catch(e){renderErr(resId,e.message);}
+  setLoad(btn,false);
+}
+
+async function solveMatSys(){
+  const btn=event.currentTarget; setLoad(btn,true);
+  const m=parseInt(document.getElementById('sys-m').value);
+  const n=parseInt(document.getElementById('sys-n').value);
+  const A=getMat('sys-A',m,n); const bv=getMat('sys-b',m,1);
+  try{renderRes('res-msys',await api('matrix/system',{A,b:bv}));}
+  catch(e){renderErr('res-msys',e.message);}
+  setLoad(btn,false);
+}
+
+async function demo(ep,payload){
+  const box=document.getElementById('home-res');
+  box.innerHTML='<div style="padding:16px;text-align:center;color:var(--gray);font-family:var(--font-ui)"><span class="spin" style="border-color:rgba(100,116,139,.3);border-top-color:var(--blue);width:18px;height:18px;border-width:3px"></span><span style="margin-left:10px">Hisoblanmoqda...</span></div>';
+  try{renderRes('home-res',await api(ep,payload));}
+  catch(e){renderErr('home-res',e.message);}
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded',()=>{
+  buildSys(); buildMat('det',true); buildMat('inv',true); buildMatSys();
+  // Initial LaTeX preview for pre-filled fields
+  document.querySelectorAll('.mif-input').forEach(el=>{
+    if(el.value)el.dispatchEvent(new Event('input'));
+  });
+  // Typeset static MathJax (nav table, info-bars, labels)
+  setTimeout(()=>{ if(window.MathJax)MathJax.typesetPromise(); },900);
+});
+</script>
+</body>
+</html>
